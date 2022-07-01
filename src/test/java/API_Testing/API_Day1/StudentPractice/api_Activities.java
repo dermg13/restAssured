@@ -1,6 +1,7 @@
 package API_Testing.API_Day1.StudentPractice;
 
 import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
 import org.testng.annotations.Test;
 
 public class api_Activities {
@@ -25,7 +26,7 @@ public class api_Activities {
                 .when()
                 .get("https://fakerestapi.azurewebsites.net/api/v1/Activities")
                 .then()
-                .contentType("application/json; charset=utf-8; v=1.0");
+                .assertThat().header("Content-Type","application/json; charset=utf-8; v=1.0");
     }
 // Task 1: Using Rest Assured validate the status code for endpoint /Activities/12
 
@@ -46,6 +47,7 @@ public class api_Activities {
                 .when()
                 .get("https://fakerestapi.azurewebsites.net/api/v1/Activities/12")
                 .then()
-                .contentType("application/json; charset=utf-8; v=1.0");
+//                .contentType(ContentType.XML)  ---One way
+                .assertThat().header("Content-Type","application/json; charset=utf-8; v=1.0");
     }
 }
