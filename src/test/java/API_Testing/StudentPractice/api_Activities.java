@@ -1,7 +1,6 @@
-package API_Testing.API_Day1.StudentPractice;
+package API_Testing.StudentPractice;
 
 import io.restassured.RestAssured;
-import io.restassured.http.ContentType;
 import org.testng.annotations.Test;
 
 public class api_Activities {
