@@ -4,6 +4,7 @@ import com.sun.xml.bind.v2.model.core.ID;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
+import org.hamcrest.core.Is;
 import org.testng.Assert;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
@@ -23,6 +24,9 @@ public class E2E_Project {
     String user_Id;
     Response response;
     String projectId;
+    String projectName;
+
+    String contentType;
 
     // What is a TestNG annotation that allows us to run a Test Before each Test
     @BeforeTest
@@ -111,11 +115,11 @@ public class E2E_Project {
         System.out.println("New id created when creating a project" + projectId);
     }
     @Test(dependsOnMethods = {"memberOf", "createProject"})
-    public void updateProject(){
+    public void updateProject() {
         // String JSON
         String requestBody1 = "{\"created\":1615443320845,\"description\":\"testing\",\"id\":\"" + projectId + "\",\"lastModified\":1629860121757,\"name\":\"testing Soto\",\"tags\":[],\"type\":\"DESIGN\",\"userId\":\"" + variables.get("userID") + "\",\"workspaceId\":\"" + variables.get("id") + "\"}";
 
-       response = RestAssured.given()
+        response = RestAssured.given()
                 .headers("Content-Type", "application/json")
                 .header("Authorization", setupLogInAndToken())
                 .and()
@@ -128,18 +132,41 @@ public class E2E_Project {
         System.out.println(response.prettyPeek());
 
         // TODO HOMEWORK add assertions for: id, name, type, userId, workspaceId, verify status code, Content-type
+        Assert.assertEquals(projectId, response.jsonPath().getString("id"));
+
+        // Store id in variable for future use
+        projectName = response.jsonPath().get("name");
+        Assert.assertEquals(projectName, response.jsonPath().getString("name"));
     }
+
+        @Test (dependsOnMethods = {"memberOf", "createProject"})
+        public void verifyContentType_StatusCode() {
+            RestAssured.given()
+                    .headers("Content-Type", "application/json")
+                    .header("Authorization", setupLogInAndToken())
+                    .when()
+                    .post("https://api.octoperf.com/design/projects?workspaceId=" + projectId)
+                    .then()
+//                .contentType(ContentType.XML)  ---One way
+                    .assertThat()
+                    .contentType(ContentType.JSON)
+                    .and()
+                    .statusCode(201);
+        }
+
     @Test(dependsOnMethods = {"memberOf", "createProject","updateProject"})
     public void deleteProject(){
         response = RestAssured.given()
                 .header("Authorization", setupLogInAndToken())
                 .when()
-                .delete("/design/projects" + projectId)
+                .delete("/design/projects/" + projectId)
                 .then()
+                .log().all()
                 .extract()
                 .response();
 
         // TODO HOMEWORK Validate status code
+        assertThat(response.statusCode(),is(204));
 
     }
 }
